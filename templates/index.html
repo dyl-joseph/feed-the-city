@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Volunteer — Feed the City{% endblock %}
+{% block content %}
+
+<!-- What's Needed -->
+<div id="needs-section" class="mb-6">
+    <h2 class="text-lg font-bold mb-3">What's still needed</h2>
+    <div id="needs-list" class="space-y-2">
+        <p class="text-gray-400 text-sm">Loading...</p>
+    </div>
+</div>
+
+<!-- Purchase Form -->
+<div id="purchase-form-section">
+    <h2 class="text-lg font-semibold mb-3">Log what you bought</h2>
+    <form id="purchase-form" class="space-y-3">
+        <input type="text" id="vol-name" placeholder="Your name" required
+               class="w-full p-3 border rounded-lg text-lg">
+        <input type="tel" id="vol-phone" placeholder="Phone number" required
+               class="w-full p-3 border rounded-lg text-lg">
+        <div id="item-inputs" class="space-y-2"></div>
+        <button type="submit" id="purchase-btn"
+                class="w-full bg-green-600 text-white p-3 rounded-lg text-lg font-semibold hover:bg-green-700 active:bg-green-800 transition">
+            Log Purchase
+        </button>
+    </form>
+    <p id="form-error" class="text-red-600 text-sm mt-2 hidden"></p>
+</div>
+
+<!-- Thank You -->
+<div id="thankyou-section" class="hidden text-center">
+    <div class="bg-blue-50 border border-blue-300 rounded-xl p-6">
+        <div class="text-4xl mb-2">🎉</div>
+        <h2 class="text-xl font-bold text-blue-800">Thank you!</h2>
+        <p class="text-blue-700 mt-1">Your purchase has been recorded.</p>
+    </div>
+    <button id="new-purchase-btn"
+            class="mt-4 text-green-600 underline text-sm">
+        Log another purchase
+    </button>
+</div>
+
+{% endblock %}

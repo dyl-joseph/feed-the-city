@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Feed the City{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-green-700 text-white p-4 shadow-lg">
+        <div class="max-w-lg mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-bold">🥪 Feed the City</a>
+            <div class="flex gap-4 text-sm">
+                <a href="/" class="hover:underline">Volunteer</a>
+                <a href="/dashboard" class="hover:underline">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+    <main class="max-w-lg mx-auto p-4">
+        {% block content %}{% endblock %}
+    </main>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
