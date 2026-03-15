@@ -8,8 +8,8 @@ TURSO_TOKEN = os.environ.get('TURSO_AUTH_TOKEN', '')
 def get_db():
     if TURSO_URL:
         import libsql_experimental as libsql
-        conn = libsql.connect("feed-the-city.db", sync_url=TURSO_URL, auth_token=TURSO_TOKEN)
-        conn.sync()
+        url = TURSO_URL.replace("libsql://", "https://")
+        conn = libsql.connect(url, auth_token=TURSO_TOKEN)
         return conn
     conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), 'feed_the_city.db'))
     conn.row_factory = sqlite3.Row
