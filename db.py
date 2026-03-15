@@ -11,17 +11,20 @@ class TursoDB:
     def __init__(self):
         self._base_url = TURSO_URL.replace("libsql://", "https://")
 
+    @staticmethod
+    def _encode_param(p):
+        if p is None:
+            return {"type": "null"}
+        if isinstance(p, bool):
+            return {"type": "integer", "value": str(int(p))}
+        if isinstance(p, int):
+            return {"type": "integer", "value": str(p)}
+        if isinstance(p, float):
+            return {"type": "float", "value": str(p)}
+        return {"type": "text", "value": str(p)}
+
     def _request(self, sql, params=()):
-        args = []
-        for p in params:
-            if isinstance(p, int):
-                args.append({"type": "integer", "value": str(p)})
-            elif isinstance(p, float):
-                args.append({"type": "float", "value": str(p)})
-            elif p is None:
-                args.append({"type": "null"})
-            else:
-                args.append({"type": "text", "value": str(p)})
+        args = [self._encode_param(p) for p in params]
 
         body = json.dumps({
             "requests": [
@@ -38,8 +41,12 @@ class TursoDB:
                 "Content-Type": "application/json"
             }
         )
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read())
+        try:
+            with urllib.request.urlopen(req) as resp:
+                data = json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode()
+            raise Exception(f"Turso HTTP {e.code}: {error_body}")
 
         result = data["results"][0]["response"]["result"]
         return result
