@@ -20,7 +20,7 @@ class TursoDB:
         if isinstance(p, int):
             return {"type": "integer", "value": str(p)}
         if isinstance(p, float):
-            return {"type": "float", "value": str(p)}
+            return {"type": "float", "value": p}
         return {"type": "text", "value": str(p)}
 
     def _request(self, sql, params=()):
