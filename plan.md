@@ -45,9 +45,11 @@ feed_the_city/
 - [x] End-to-end API tests pass (libsql)
 - [x] Vercel config (`vercel.json`)
 - [x] Turso support in db.py (falls back to local SQLite if no env vars)
-- [ ] Live browser testing
-- [ ] Create Turso DB + set env vars on Vercel
+- [x] Session security hardened (HttpOnly, SameSite=Lax, Secure on Vercel)
+- [x] `.gitignore` (*.db, __pycache__, .vercel, .env, *.DS_STORE)
+- [ ] Turso DB created + Vercel env vars set
 - [ ] Deploy to Vercel
+- [ ] Live browser testing
 
 ## Dev Commands
 ```bash
