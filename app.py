@@ -165,25 +165,29 @@ def update_recipe():
     data = request.json
     db = get_db()
 
-    if 'target_sandwiches' in data:
-        db.execute("UPDATE recipe SET target_sandwiches=? WHERE id=1", (int(data['target_sandwiches']),))
+    try:
+        if 'target_sandwiches' in data:
+            db.execute("UPDATE recipe SET target_sandwiches=? WHERE id=1", (int(data['target_sandwiches']),))
 
-    if 'target_enabled' in data:
-        db.execute("UPDATE recipe SET target_enabled=? WHERE id=1", (1 if data['target_enabled'] else 0,))
+        if 'target_enabled' in data:
+            db.execute("UPDATE recipe SET target_enabled=? WHERE id=1", (1 if data['target_enabled'] else 0,))
 
-    if 'ingredients' in data:
-        db.execute("DELETE FROM ingredient")
-        for ing in data['ingredients']:
-            db.execute(
-                "INSERT INTO ingredient (name, qty_per_sandwich, unit, package_size, package_unit, display_note) VALUES (?, ?, ?, ?, ?, ?)",
-                (ing['name'], float(ing['qty_per_sandwich']), ing['unit'],
-                 float(ing['package_size']) if ing.get('package_size') else None,
-                 ing.get('package_unit'), ing.get('display_note'))
-            )
+        if 'ingredients' in data:
+            db.execute("DELETE FROM ingredient")
+            for ing in data['ingredients']:
+                db.execute(
+                    "INSERT INTO ingredient (name, qty_per_sandwich, unit, package_size, package_unit, display_note) VALUES (?, ?, ?, ?, ?, ?)",
+                    (ing['name'], float(ing['qty_per_sandwich']), ing['unit'],
+                     float(ing['package_size']) if ing.get('package_size') else None,
+                     ing.get('package_unit'), ing.get('display_note'))
+                )
 
-    db.commit()
-    db.close()
-    return jsonify({'success': True})
+        db.commit()
+        db.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.close()
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/admin/reset', methods=['POST'])
