@@ -1,3 +1,3 @@
 flask
-libsql-experimental
+libsql-client
 gunicorn
