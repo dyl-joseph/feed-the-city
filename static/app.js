@@ -1,9 +1,13 @@
 // --- Helpers ---
 function $(id) { return document.getElementById(id); }
 
+let adminToken = localStorage.getItem('adminToken') || '';
+
 async function api(url, opts = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (adminToken) headers['X-Admin-Token'] = adminToken;
     const res = await fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         ...opts,
         body: opts.body ? JSON.stringify(opts.body) : undefined
     });
@@ -208,10 +212,12 @@ function initAdmin() {
     $('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
-            await api('/api/admin/login', {
+            const loginResult = await api('/api/admin/login', {
                 method: 'POST',
                 body: { password: $('admin-password').value }
             });
+            adminToken = loginResult.token;
+            localStorage.setItem('adminToken', adminToken);
             const data = await api('/api/admin/recipe');
             $('admin-login').classList.add('hidden');
             $('admin-panel').classList.remove('hidden');

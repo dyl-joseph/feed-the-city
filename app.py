@@ -130,13 +130,13 @@ def api_purchases():
 def admin_login():
     data = request.json
     if data.get('password') == ADMIN_PASSWORD:
-        session['admin'] = True
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'token': ADMIN_PASSWORD})
     return jsonify({'error': 'Wrong password'}), 401
 
 
 def require_admin():
-    if not session.get('admin'):
+    token = request.headers.get('X-Admin-Token', '')
+    if token != ADMIN_PASSWORD:
         return jsonify({'error': 'Unauthorized'}), 401
     return None
 
@@ -203,4 +203,5 @@ def admin_reset():
 init_db()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, port=port)
