@@ -1,20 +1,52 @@
+import json
 import os
 import sqlite3
+import urllib.request
 
 TURSO_URL = os.environ.get('TURSO_DATABASE_URL', '')
 TURSO_TOKEN = os.environ.get('TURSO_AUTH_TOKEN', '')
 
 
 class TursoDB:
-    """Wraps libsql_client to match sqlite3 cursor interface used by query()."""
     def __init__(self):
-        from libsql_client import create_client_sync
-        url = TURSO_URL.replace("libsql://", "https://")
-        self._client = create_client_sync(url=url, auth_token=TURSO_TOKEN)
+        self._base_url = TURSO_URL.replace("libsql://", "https://")
+
+    def _request(self, sql, params=()):
+        args = []
+        for p in params:
+            if isinstance(p, int):
+                args.append({"type": "integer", "value": str(p)})
+            elif isinstance(p, float):
+                args.append({"type": "float", "value": str(p)})
+            elif p is None:
+                args.append({"type": "null"})
+            else:
+                args.append({"type": "text", "value": str(p)})
+
+        body = json.dumps({
+            "requests": [
+                {"type": "execute", "stmt": {"sql": sql, "args": args}},
+                {"type": "close"}
+            ]
+        }).encode()
+
+        req = urllib.request.Request(
+            f"{self._base_url}/v2/pipeline",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {TURSO_TOKEN}",
+                "Content-Type": "application/json"
+            }
+        )
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read())
+
+        result = data["results"][0]["response"]["result"]
+        return result
 
     def execute(self, sql, params=()):
-        rs = self._client.execute(sql, list(params))
-        return _TursoResult(rs)
+        result = self._request(sql, params)
+        return _TursoResult(result)
 
     def commit(self):
         pass
@@ -23,21 +55,25 @@ class TursoDB:
         pass
 
     def close(self):
-        self._client.close()
+        pass
 
 
 class _TursoResult:
-    """Adapts libsql_client ResultSet to look like a sqlite3 cursor."""
-    def __init__(self, rs):
-        self._rs = rs
-        self.description = [(col, None, None, None, None, None, None) for col in rs.columns] if rs.columns else None
-        self.lastrowid = rs.last_insert_rowid
+    def __init__(self, result):
+        self._result = result
+        cols = result.get("cols", [])
+        self.description = [(c["name"], None, None, None, None, None, None) for c in cols] if cols else None
+        self.lastrowid = result.get("last_insert_rowid")
 
     def fetchall(self):
-        return self._rs.rows
+        rows = []
+        for row in self._result.get("rows", []):
+            rows.append(tuple(cell.get("value") for cell in row))
+        return rows
 
     def fetchone(self):
-        return self._rs.rows[0] if self._rs.rows else None
+        all_rows = self.fetchall()
+        return all_rows[0] if all_rows else None
 
 
 def get_db():
