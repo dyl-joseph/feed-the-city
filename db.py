@@ -65,10 +65,22 @@ class _TursoResult:
         self.description = [(c["name"], None, None, None, None, None, None) for c in cols] if cols else None
         self.lastrowid = result.get("last_insert_rowid")
 
+    @staticmethod
+    def _cast(cell):
+        t = cell.get("type", "")
+        v = cell.get("value")
+        if t == "null" or v is None:
+            return None
+        if t == "integer":
+            return int(v)
+        if t == "float":
+            return float(v)
+        return v
+
     def fetchall(self):
         rows = []
         for row in self._result.get("rows", []):
-            rows.append(tuple(cell.get("value") for cell in row))
+            rows.append(tuple(self._cast(cell) for cell in row))
         return rows
 
     def fetchone(self):
